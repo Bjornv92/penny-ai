@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 
 // Define the shape of a transaction using TypeScript
 type Transaction = {
@@ -10,7 +11,15 @@ type Transaction = {
 
 export default function App() {
   // State for the list of transactions
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+  const saved = localStorage.getItem("transactions");
+  return saved ? JSON.parse(saved) : [];
+});
+
+// Add auto save
+useEffect(() => {
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+}, [transactions]);
 
   // State for form inputs (controlled components)
   const [description, setDescription] = useState("");
@@ -70,14 +79,22 @@ export default function App() {
 
       {/* Balance display */}
       <div style={styles.balanceBox}>
-        <h2>Balance: €{summary.balance.toFixed(2)}</h2>
-        <h3 style={styles.income}>
-          Income: €{summary.income.toFixed(2)}
-        </h3>
-        <h3 style={styles.expenses}>
+  
+        <h2 style={styles.balanceTitle}>
+          Balance: €{summary.balance.toFixed(2)}
+        </h2>
+
+        <div style={styles.summaryRow}>
+          <div style={styles.summaryCardIncome}>
+            Income: €{summary.income.toFixed(2)}
+          </div>
+
+        <div style={styles.summaryCardExpenses}>
           Expenses: €{summary.expenses.toFixed(2)}
-        </h3>
+        </div>
       </div>
+
+    </div>
 
       {/* Form */}
       <div style={styles.form}>
@@ -205,4 +222,34 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#c62828",
     margin: "4px 0",
   },
+
+  balanceTitle: {
+  marginBottom: 10,
+},
+
+summaryRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 10,
+},
+
+summaryCardIncome: {
+  flex: 1,
+  padding: 10,
+  background: "#e8f5e9",
+  color: "#2e7d32",
+  borderRadius: 6,
+  textAlign: "center",
+  fontWeight: "bold",
+},
+
+summaryCardExpenses: {
+  flex: 1,
+  padding: 10,
+  background: "#ffebee",
+  color: "#c62828",
+  borderRadius: 6,
+  textAlign: "center",
+  fontWeight: "bold",
+},
 };
